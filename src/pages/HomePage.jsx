@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import extractComponentsFromJson from "../utils/extractComponentFromJson";
 import HeroImage from "../components/HeroImage";
+import SearchBar from "../components/SearchBar";
 
 const HomePage = () => {
   const [components, setComponents] = useState([]);
@@ -16,8 +17,8 @@ const HomePage = () => {
       }
 
       const parsed = JSON.parse(json);
-      console.log("parsed", parsed);
       const extracted = await extractComponentsFromJson(parsed);
+
       setComponents(extracted);
       setLoading(false);
     };
@@ -30,10 +31,8 @@ const HomePage = () => {
   return (
     <div>
       {components.map((comp, i) => {
-        console.log("Rendering Component:", comp);
-
         if (comp.type === "image") return <HeroImage key={i} {...comp} />;
-
+        if (comp.type === "search-bar") return <SearchBar key={i} {...comp} />;
         return null;
       })}
     </div>

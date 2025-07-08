@@ -5,6 +5,8 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import heroImageComponent from "../grapesComponents/heroImageComponent";
 import heroImageBlock from "../blocks/heroImageBlock";
+import searchBarBlock from "../blocks/searchBarBlock";
+import searchBarComponent from "../grapesComponents/searchBarComponent";
 
 const PageBuilder = () => {
   const [editor, setEditor] = useState(null);
@@ -42,15 +44,16 @@ const PageBuilder = () => {
               setEditor(editor);
               editor.I18n.setLocale("en");
 
-              // ✅ Load custom components
+              // Load custom components
               heroImageComponent(editor);
+              searchBarComponent(editor)
             }}
             options={{
               theme: "dark",
               ssages: {},
 
               blocks: {
-                default: [heroImageBlock],
+                default: [heroImageBlock, searchBarBlock],
               },
               pages: false,
               project: {

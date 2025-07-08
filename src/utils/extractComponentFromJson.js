@@ -2,7 +2,7 @@ const extractComponentsFromJson = async (parsedJson) => {
   const found = [];
   const styleMap = {};
 
-  // Map styles by id selector
+  // Build style map from ID selectors
   parsedJson.styles?.forEach((style) => {
     style.selectors?.forEach((sel) => {
       if (sel.startsWith("#")) {
@@ -14,55 +14,57 @@ const extractComponentsFromJson = async (parsedJson) => {
 
   const extract = (comps) => {
     if (!comps) return;
+
     for (const comp of comps) {
       const id = comp.attributes?.id;
+
       const common = {
         id,
         classes: comp.classes || [],
         style: comp.style || {},
         appliedStyle: id && styleMap[id] ? styleMap[id] : {},
+        direction: comp.direction || comp.attributes?.direction || "ltr",
+        language: comp.language || comp.attributes?.language || "en",
       };
 
-      switch (comp.type) {
-        case "image":
-          found.push({
-            type: "image",
-            mode: comp.attributes?.mode || "static",
-            text: "",
-            ...common,
-            attributes: comp.attributes || {},
-          });
-          break;
-
-      
-
-        case "search-bar":
-          found.push({
-            type: "search-bar",
-            ...common,
-            attributes: comp.attributes || {},
-          });
-          break;
-
-        case "card":
-          found.push({
-            type: "card",
-            ...common,
-            attributes: comp.attributes || {},
-          });
-          break;
-
-        // Add more types here as needed
-
-        default:
-          // Optionally, handle unknown types or skip
-          break;
+      // ✅ Search Bar component
+      if (comp.type === "search-bar") {
+        found.push({
+          type: "search-bar",
+          theme: comp.attributes?.theme || "theme1",
+          returnField: comp.attributes?.returnField || "with-return",
+          components: (comp.components || []).map((child) => ({
+            tag: child.type,
+            id: child.attributes?.id,
+            placeholder: child.attributes?.placeholder,
+            type: child.attributes?.type,
+            content: child.content,
+            classes: child.classes || [],
+            style: child.attributes?.id ? styleMap[child.attributes.id] || {} : {},
+            components: child.components || [],
+            attributes: child.attributes || {},
+          })),
+          ...common,
+        });
       }
 
+      // ✅ Image component
+      else if (comp.type === "image") {
+        found.push({
+          type: "image",
+          alt: comp.attributes?.alt || "",
+          src: comp.attributes?.src || "",
+          ...common,
+          attributes: comp.attributes || {},
+        });
+      }
+
+      // Recurse for nested components
       if (comp.components) extract(comp.components);
     }
   };
 
+  // Loop through all pages & frames
   parsedJson.pages?.forEach((p) =>
     p.frames?.forEach((f) => extract(f.component?.components || []))
   );
