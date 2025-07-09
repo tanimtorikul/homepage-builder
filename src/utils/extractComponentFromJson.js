@@ -59,7 +59,20 @@ const extractComponentsFromJson = async (parsedJson) => {
         });
       }
 
-      // Recurse for nested components
+      // ✅ Text component (title/headline)
+      else if (comp.type === "text") {
+        const content =
+          comp.components?.find((c) => c.type === "textnode")?.content || "";
+
+        found.push({
+          type: "text",
+          content,
+          ...common,
+          attributes: comp.attributes || {},
+        });
+      }
+
+      // Recurse into nested children
       if (comp.components) extract(comp.components);
     }
   };

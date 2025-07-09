@@ -4,6 +4,7 @@ import HeroImage from "../components/HeroImage";
 import SearchBar from "../components/SearchBar";
 import Topbar from "../components/Topbar";
 import Navbar from "../components/Navbar";
+import SearchText from "../components/SearchText";
 
 const HomePage = () => {
   const [components, setComponents] = useState([]);
@@ -39,6 +40,7 @@ const HomePage = () => {
         {components.map((comp, i) => {
           if (comp.type === "image") return <HeroImage key={i} {...comp} />;
           if (comp.type === "search-bar") return <SearchBar key={i} {...comp} />;
+            if (comp.type === "text") return <SearchText key={i} {...comp} />;
           return null;
         })}
       </main>

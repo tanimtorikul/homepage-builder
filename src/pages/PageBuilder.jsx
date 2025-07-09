@@ -7,6 +7,9 @@ import heroImageComponent from "../grapesComponents/heroImageComponent";
 import heroImageBlock from "../blocks/heroImageBlock";
 import searchBarBlock from "../blocks/searchBarBlock";
 import searchBarComponent from "../grapesComponents/searchBarComponent";
+import latestNewsComponent from "../grapesComponents/latestNewsComponent";
+import latestNewsBlock from "../blocks/latestNewsBlock";
+import searchHeadingText from "../blocks/searchHeadingText";
 
 const PageBuilder = () => {
   const [editor, setEditor] = useState(null);
@@ -47,13 +50,14 @@ const PageBuilder = () => {
               // Load custom components
               heroImageComponent(editor);
               searchBarComponent(editor)
+              latestNewsComponent(editor)
             }}
             options={{
               theme: "dark",
               ssages: {},
 
               blocks: {
-                default: [heroImageBlock, searchBarBlock],
+                default: [heroImageBlock, searchBarBlock, latestNewsBlock, searchHeadingText],
               },
               pages: false,
               project: {
