@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import extractComponentsFromJson from "../utils/extractComponentFromJson";
 import HeroImage from "../components/HeroImage";
 import SearchBar from "../components/SearchBar";
+import Topbar from "../components/Topbar";
+import Navbar from "../components/Navbar";
 
 const HomePage = () => {
   const [components, setComponents] = useState([]);
@@ -29,13 +31,19 @@ const HomePage = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
-      {components.map((comp, i) => {
-        if (comp.type === "image") return <HeroImage key={i} {...comp} />;
-        if (comp.type === "search-bar") return <SearchBar key={i} {...comp} />;
-        return null;
-      })}
-    </div>
+    <>
+      <Topbar />
+      <Navbar />
+
+      <main>
+        {components.map((comp, i) => {
+          if (comp.type === "image") return <HeroImage key={i} {...comp} />;
+          if (comp.type === "search-bar") return <SearchBar key={i} {...comp} />;
+          return null;
+        })}
+      </main>
+
+    </>
   );
 };
 

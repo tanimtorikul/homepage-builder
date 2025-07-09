@@ -9,10 +9,10 @@ const searchBarComponent = (editor) => {
         classes: ["search-bar"],
         attributes: {
           theme: "theme1",
-          returnOption: "with",
           language: "en",
           direction: "ltr",
           showTraveler: false,
+          searchType: "oneway", // new trait default
         },
         traits: [
           {
@@ -28,13 +28,13 @@ const searchBarComponent = (editor) => {
           },
           {
             type: "select",
-            name: "returnOption",
-            label: "Return Option",
+            name: "searchType",
+            label: "Search Type",
             options: [
-              { value: "with", name: "With Return" },
-              { value: "without", name: "Without Return" },
+              { value: "oneway", name: "One Way" },
+              { value: "round", name: "Round Way" },
             ],
-            value: "with",
+            value: "oneway",
             changeProp: 1,
           },
           {
@@ -71,7 +71,7 @@ const searchBarComponent = (editor) => {
 
       init() {
         this.listenTo(this, "change:theme", this.updateComponents);
-        this.listenTo(this, "change:returnOption", this.updateComponents);
+        this.listenTo(this, "change:searchType", this.updateComponents);
         this.listenTo(this, "change:language", this.updateComponents);
         this.listenTo(this, "change:direction", this.updateComponents);
         this.listenTo(this, "change:showTraveler", this.updateComponents);
@@ -80,7 +80,7 @@ const searchBarComponent = (editor) => {
 
       updateComponents() {
         const theme = this.get("theme");
-        const returnOption = this.get("returnOption");
+        const searchType = this.get("searchType");
         const language = this.get("language");
         const direction = this.get("direction");
         const showTraveler = this.get("showTraveler");
@@ -124,14 +124,14 @@ const searchBarComponent = (editor) => {
                   type: "radio",
                   name: "tripType",
                   value: "oneway",
-                  checked: true,
+                  checked: searchType === "oneway",
                 },
               },
               { type: "textnode", content: t.oneway },
             ],
           });
 
-          if (returnOption !== "without") {
+          if (searchType === "round") {
             radioComponents.push({
               type: "label",
               components: [
@@ -141,6 +141,7 @@ const searchBarComponent = (editor) => {
                     type: "radio",
                     name: "tripType",
                     value: "round",
+                    checked: false,
                   },
                 },
                 { type: "textnode", content: t.round },
@@ -153,9 +154,6 @@ const searchBarComponent = (editor) => {
             classes: ["trip-radio-wrapper"],
             components: radioComponents,
           });
-        }
-
-        if (showTraveler === true) {
         }
 
         const directionClass =
@@ -191,7 +189,11 @@ const searchBarComponent = (editor) => {
           }
         );
 
-        if (returnOption !== "without") {
+        // Add return date if round way selected for both themes
+        if (
+          (theme === "theme1" && searchType === "round") ||
+          (theme === "theme2" && searchType === "round")
+        ) {
           comps.push({
             type: "input",
             attributes: {
@@ -203,7 +205,6 @@ const searchBarComponent = (editor) => {
           });
         }
 
-        // ✅ Traveler field (if toggled)
         if (showTraveler) {
           comps.push({
             type: "input",
