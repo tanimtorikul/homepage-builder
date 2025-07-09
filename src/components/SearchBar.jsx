@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { DatePicker, Button } from "antd";
+import { DatePicker } from "antd";
 import { useForm, Controller } from "react-hook-form";
-import moment from "moment";
 
 const SearchBar = ({
   components,
@@ -16,6 +15,7 @@ const SearchBar = ({
   const [locations, setLocations] = useState([]);
   const showReturn = theme === "theme1" && returnField === "with-return";
 
+  console.log('components', components)
 
   const { handleSubmit, control, register } = useForm();
 
@@ -41,7 +41,6 @@ const SearchBar = ({
   };
 
   return (
-    <div className="container">
       <form
         id={id}
         onSubmit={handleSubmit(onSubmit)}
@@ -51,7 +50,7 @@ const SearchBar = ({
         dir={direction}
       >
         {components.map((field, idx) => {
-          // Trip type radios
+          // Trip type radios (theme2)
           if (
             field.tag === "div" &&
             field.classes?.includes("trip-radio-wrapper") &&
@@ -98,16 +97,12 @@ const SearchBar = ({
           // Skip Return Date if not needed
           if (field.placeholder === "Return Date" && !showReturn) return null;
 
-          const isSelect =
-            field.placeholder === "Origin" ||
-            field.placeholder === "Destination";
-
-          // Native Select
-          if (field.tag === "input" && isSelect) {
+          // Render select dropdown
+          if (field.type === "select") {
             return (
               <Controller
                 key={idx}
-                name={field.placeholder.toLowerCase()}
+                name="traveler" // Change this if you want dynamic field names
                 control={control}
                 defaultValue=""
                 render={({ field: { onChange, value, ref, ...rest } }) => (
@@ -127,13 +122,18 @@ const SearchBar = ({
                     }}
                   >
                     <option value="" disabled>
-                      {field.placeholder}
+                      {field.components?.[0]?.content || "Select..."}
                     </option>
-                    {locations.map((loc, i) => (
-                      <option key={i} value={loc.value}>
-                        {loc.label}
-                      </option>
-                    ))}
+                    {field.components
+                      ?.filter((c) => c.type === "option")
+                      .map((option, i) => (
+                        <option
+                          key={i}
+                          value={option.attributes?.value || option.content}
+                        >
+                          {option.content}
+                        </option>
+                      ))}
                   </select>
                 )}
               />
@@ -175,13 +175,13 @@ const SearchBar = ({
             );
           }
 
-          // Regular input
+          // Regular input (including traveler input as number)
           if (field.tag === "input") {
             const name = field.placeholder.toLowerCase().replace(" ", "_");
             return (
               <input
                 key={idx}
-                type={field.type || "text"}
+                type={field.attributes?.type || "text"}
                 placeholder={field.placeholder}
                 className={`${
                   field.classes?.join(" ") || ""
@@ -197,7 +197,7 @@ const SearchBar = ({
           }
 
           // Submit button
-         if (field.tag === "button") {
+          if (field.tag === "button") {
             return (
               <button
                 key={idx}
@@ -220,7 +220,6 @@ const SearchBar = ({
           return null;
         })}
       </form>
-    </div>
   );
 };
 

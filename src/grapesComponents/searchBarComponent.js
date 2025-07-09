@@ -1,161 +1,132 @@
 const searchBarComponent = (editor) => {
   editor.Components.addType("search-bar", {
-   model: {
-  defaults: {
-    tagName: "div",
-    droppable: true,
-    stylable: true,
-    editable: true,
-    classes: ["search-bar"],
-    attributes: {
-      theme: "theme1",
-      language: "en",
-      direction: "ltr",
-      showTraveler: false,
-      searchType: "oneway",
-    },
-    traits: function () {
-      return [
-        {
-          type: "select",
-          name: "theme",
-          label: "Select Theme",
-          options: [
-            { value: "theme1", name: "Theme 1" },
-            { value: "theme2", name: "Theme 2" },
-          ],
-          value: "theme1",
-          changeProp: 1,
+    model: {
+      defaults: {
+        tagName: "div",
+        droppable: true,
+        stylable: true,
+        editable: true,
+        classes: ["search-bar"],
+        attributes: {
+          theme: "theme1",
+          language: "en",
+          direction: "ltr",
+          showTraveler: false,
+          searchType: "oneway",
+          travelerType: "label",
+          travelerDropdownType: "traveler-count",
         },
-        {
-          type: "select",
-          name: "searchType",
-          label: "Search Type",
-          options: [
-            { value: "oneway", name: "One Way" },
-            { value: "round", name: "Round Way" },
-          ],
-          value: "oneway",
-          changeProp: 1,
-        },
-        {
-          type: "select",
-          name: "language",
-          label: "Language",
-          options: [
-            { value: "en", name: "English" },
-            { value: "bn", name: "বাংলা" },
-          ],
-          value: "en",
-          changeProp: 1,
-        },
-        {
-          type: "select",
-          name: "direction",
-          label: "Direction",
-          options: [
-            { value: "ltr", name: "Left to Right" },
-            { value: "rtl", name: "Right to Left" },
-          ],
-          value: "ltr",
-          changeProp: 1,
-        },
-        {
-          type: "checkbox",
-          name: "showTraveler",
-          label: "Traveler Selection",
-          value: false,
-          changeProp: 1,
-        },
-      ];
-    },
-  },
-
-  init() {
-    this.listenTo(this, "change:theme", this.updateComponents);
-    this.listenTo(this, "change:searchType", this.updateComponents);
-    this.listenTo(this, "change:language", this.updateComponents);
-    this.listenTo(this, "change:direction", this.updateComponents);
-    this.listenTo(this, "change:showTraveler", this.updateComponents);
-    this.listenTo(this, "change:showTraveler", this.updateTraitsBasedOnTraveler);
-    this.updateComponents();
-    this.updateTraitsBasedOnTraveler();
-  },
-
-  updateTraitsBasedOnTraveler() {
-    const showTraveler = this.get("showTraveler");
-
-    const baseTraits = [
-      {
-        type: "select",
-        name: "theme",
-        label: "Select Theme",
-        options: [
-          { value: "theme1", name: "Theme 1" },
-          { value: "theme2", name: "Theme 2" },
-        ],
-        value: "theme1",
-        changeProp: 1,
+        traits: [],
       },
-      {
-        type: "select",
-        name: "searchType",
-        label: "Search Type",
-        options: [
-          { value: "oneway", name: "One Way" },
-          { value: "round", name: "Round Way" },
-        ],
-        value: "oneway",
-        changeProp: 1,
-      },
-      {
-        type: "select",
-        name: "language",
-        label: "Language",
-        options: [
-          { value: "en", name: "English" },
-          { value: "bn", name: "বাংলা" },
-        ],
-        value: "en",
-        changeProp: 1,
-      },
-      {
-        type: "select",
-        name: "direction",
-        label: "Direction",
-        options: [
-          { value: "ltr", name: "Left to Right" },
-          { value: "rtl", name: "Right to Left" },
-        ],
-        value: "ltr",
-        changeProp: 1,
-      },
-      {
-        type: "checkbox",
-        name: "showTraveler",
-        label: "Traveler Selection",
-        value: false,
-        changeProp: 1,
-      },
-    ];
 
-    // Add extra dropdown if traveler selection is checked
-    if (showTraveler) {
-      baseTraits.push({
-        type: "select",
-        name: "travelerType",
-        label: "Traveler Type",
-        options: [
-          { value: "dropdown", name: "Dropdown" },
-          { value: "label", name: "Label" },
-        ],
-        value: "dropdown",
-        changeProp: 1,
-      });
-    }
+      init() {
+        this.listenTo(this, "change:theme", this.updateComponents);
+        this.listenTo(this, "change:searchType", this.updateComponents);
+        this.listenTo(this, "change:language", this.updateComponents);
+        this.listenTo(this, "change:direction", this.updateComponents);
 
-    this.set("traits", baseTraits);
-  },
+        this.listenTo(this, "change:showTraveler", () => {
+          this.updateTraitsBasedOnTraveler();
+          this.updateComponents();
+        });
+
+        this.listenTo(this, "change:travelerType", () => {
+          this.updateTraitsBasedOnTraveler();
+          this.updateComponents();
+        });
+
+        this.updateTraitsBasedOnTraveler();
+        this.updateComponents();
+      },
+
+      updateTraitsBasedOnTraveler() {
+        const showTraveler = this.get("showTraveler");
+        const travelerType = this.get("travelerType");
+
+        const baseTraits = [
+          {
+            type: "select",
+            name: "theme",
+            label: "Select Theme",
+            options: [
+              { value: "theme1", name: "Theme 1" },
+              { value: "theme2", name: "Theme 2" },
+            ],
+            value: "theme1",
+            changeProp: 1,
+          },
+          {
+            type: "select",
+            name: "searchType",
+            label: "Search Type",
+            options: [
+              { value: "oneway", name: "One Way" },
+              { value: "round", name: "Round Way" },
+            ],
+            value: "oneway",
+            changeProp: 1,
+          },
+          {
+            type: "select",
+            name: "language",
+            label: "Language",
+            options: [
+              { value: "en", name: "English" },
+              { value: "bn", name: "বাংলা" },
+            ],
+            value: "en",
+            changeProp: 1,
+          },
+          {
+            type: "select",
+            name: "direction",
+            label: "Direction",
+            options: [
+              { value: "ltr", name: "Left to Right" },
+              { value: "rtl", name: "Right to Left" },
+            ],
+            value: "ltr",
+            changeProp: 1,
+          },
+          {
+            type: "checkbox",
+            name: "showTraveler",
+            label: "Traveler Selection",
+            value: showTraveler,
+            changeProp: 1,
+          },
+        ];
+
+        if (showTraveler) {
+          baseTraits.push({
+            type: "select",
+            name: "travelerType",
+            label: "Traveler Type",
+            options: [
+              { value: "dropdown", name: "Dropdown" },
+              { value: "label", name: "Label" },
+            ],
+            value: "label",
+            changeProp: 1,
+          });
+
+          if (travelerType === "dropdown") {
+            baseTraits.push({
+              type: "select",
+              name: "travelerDropdownType",
+              label: "Traveler Dropdown Mode",
+              options: [
+                { value: "traveler-count", name: "Traveler Count" },
+                { value: "traveler-details", name: "Traveler Count with Details" },
+              ],
+              value: "traveler-count",
+              changeProp: 1,
+            });
+          }
+        }
+
+        this.set("traits", baseTraits);
+      },
 
       updateComponents() {
         const theme = this.get("theme");
@@ -163,6 +134,7 @@ const searchBarComponent = (editor) => {
         const language = this.get("language");
         const direction = this.get("direction");
         const showTraveler = this.get("showTraveler");
+        const travelerType = this.get("travelerType") || "label";
 
         const texts = {
           en: {
@@ -235,8 +207,7 @@ const searchBarComponent = (editor) => {
           });
         }
 
-        const directionClass =
-          direction === "rtl" ? "rtl-direction" : "ltr-direction";
+        const directionClass = direction === "rtl" ? "rtl-direction" : "ltr-direction";
 
         comps.push(
           {
@@ -268,7 +239,6 @@ const searchBarComponent = (editor) => {
           }
         );
 
-        // Add return date if round way selected for both themes
         if (
           (theme === "theme1" && searchType === "round") ||
           (theme === "theme2" && searchType === "round")
@@ -285,17 +255,39 @@ const searchBarComponent = (editor) => {
         }
 
         if (showTraveler) {
-          comps.push({
-            type: "input",
-            attributes: {
-              type: "number",
-              min: 1,
-              value: 1,
-              placeholder: t.travelers,
-              dir: direction,
-            },
-            classes: [directionClass],
-          });
+          if (travelerType === "dropdown") {
+            comps.push({
+              type: "select",
+              attributes: {
+                dir: direction,
+              },
+              classes: [directionClass],
+              components: [
+                {
+                  type: "option",
+                  attributes: {
+                    value: "",
+                    disabled: true,
+                    selected: true,
+                    hidden: true,
+                  },
+                  content: t.travelers,
+                },
+              ],
+            });
+          } else {
+            comps.push({
+              type: "input",
+              attributes: {
+                type: "number",
+                min: 1,
+                value: 1,
+                placeholder: t.travelers,
+                dir: direction,
+              },
+              classes: [directionClass],
+            });
+          }
         }
 
         comps.push({
