@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import "@grapesjs/studio-sdk/style";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+
+import { googleFontsAssetProvider } from "@grapesjs/studio-sdk-plugins";
+
 import heroImageComponent from "../grapesComponents/heroImageComponent";
-import heroImageBlock from "../blocks/heroImageBlock";
-import searchBarBlock from "../blocks/searchBarBlock";
 import searchBarComponent from "../grapesComponents/searchBarComponent";
 import latestNewsComponent from "../grapesComponents/latestNewsComponent";
+import heroImageBlock from "../blocks/heroImageBlock";
+import searchBarBlock from "../blocks/searchBarBlock";
 import latestNewsBlock from "../blocks/latestNewsBlock";
 import searchHeadingText from "../blocks/searchHeadingText";
 
@@ -15,7 +18,6 @@ const PageBuilder = () => {
   const [editor, setEditor] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ Save handler
   const handleSave = async () => {
     if (!editor) return;
     const projectData = await editor.getProjectData();
@@ -26,49 +28,67 @@ const PageBuilder = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Header */}
-      <div className="p-2 bg-gray-100 border-b flex justify-between items-center">
+      <header className="p-2 bg-gray-100 border-b flex justify-between items-center">
         <h1 className="text-xl font-bold">Builder</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleSave}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded"
-          >
-            Save Template
-          </button>
-        </div>
-      </div>
+        <button
+          onClick={handleSave}
+          className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded"
+        >
+          Save Template
+        </button>
+      </header>
 
-      {/* StudioEditor */}
       <div className="flex-1 flex">
-        <div className="flex-1">
-          <StudioEditor
-            onEditor={(editor) => {
-              setEditor(editor);
-              editor.I18n.setLocale("en");
+        <StudioEditor
+          onEditor={(editorInstance) => {
+            setEditor(editorInstance);
+            editorInstance.I18n.setLocale("en");
 
-              // Load custom components
-              heroImageComponent(editor);
-              searchBarComponent(editor)
-              latestNewsComponent(editor)
-            }}
-            options={{
-              theme: "dark",
-              ssages: {},
-
-              blocks: {
-                default: [heroImageBlock, searchBarBlock, latestNewsBlock, searchHeadingText],
+            // Load custom components
+            heroImageComponent(editorInstance);
+            searchBarComponent(editorInstance);
+            latestNewsComponent(editorInstance);
+          }}
+          options={{
+            theme: "dark",
+            fonts: {
+              enableFontManager: true,
+              loadGoogleFonts: true,
+            },
+            plugins: [
+              googleFontsAssetProvider.init({
+                apiKey: "AIzaSyBu8ZO9iIW_qTQaet7QqK-y60pyaZ-sOO0",
+              }),
+              (editor) => {
+                editor.onReady(() => {
+                  const textCmp = editor.getWrapper().find("p")[0];
+                  editor.select(textCmp);
+                });
               },
-              pages: false,
-              project: {
-                type: "web",
-                default: {
-                  components: '<div class="container"></div>',
-                },
+            ],
+            blocks: {
+              default: [
+                heroImageBlock,
+                searchBarBlock,
+                latestNewsBlock,
+                searchHeadingText,
+              ],
+            },
+            project: {
+              type: "web",
+              default: {
+                pages: [
+                  {
+                    name: "Home",
+                    component: `
+                      <p>Open the Typography panel on the right → Font → "+" → Choose a Google Font</p>
+                    `,
+                  },
+                ],
               },
-            }}
-          />
-        </div>
+            },
+          }}
+        />
       </div>
     </div>
   );

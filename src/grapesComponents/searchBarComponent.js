@@ -24,16 +24,15 @@ const searchBarComponent = (editor) => {
         this.listenTo(this, "change:searchType", this.updateComponents);
         this.listenTo(this, "change:language", this.updateComponents);
         this.listenTo(this, "change:direction", this.updateComponents);
-
         this.listenTo(this, "change:showTraveler", () => {
           this.updateTraitsBasedOnTraveler();
           this.updateComponents();
         });
-
         this.listenTo(this, "change:travelerType", () => {
           this.updateTraitsBasedOnTraveler();
           this.updateComponents();
         });
+        this.listenTo(this, "change:travelerDropdownType", this.updateComponents);
 
         this.updateTraitsBasedOnTraveler();
         this.updateComponents();
@@ -135,6 +134,7 @@ const searchBarComponent = (editor) => {
         const direction = this.get("direction");
         const showTraveler = this.get("showTraveler");
         const travelerType = this.get("travelerType") || "label";
+        const travelerDropdownType = this.get("travelerDropdownType") || "traveler-count";
 
         const texts = {
           en: {
@@ -146,6 +146,7 @@ const searchBarComponent = (editor) => {
             oneway: "One Way",
             round: "Round Way",
             travelers: "Travelers",
+            travelerDetails: "Traveler Count with Details",
           },
           bn: {
             origin: "উৎপত্তি স্থান",
@@ -156,6 +157,7 @@ const searchBarComponent = (editor) => {
             oneway: "একমুখী",
             round: "দ্বিমুখী",
             travelers: "ভ্রমণকারীর সংখ্যা",
+            travelerDetails: "ভ্রমণকারী বিস্তারিতসহ সংখ্যা",
           },
         };
 
@@ -164,23 +166,23 @@ const searchBarComponent = (editor) => {
         const comps = [];
 
         if (theme === "theme2") {
-          const radioComponents = [];
-
-          radioComponents.push({
-            type: "label",
-            components: [
-              {
-                type: "input",
-                attributes: {
-                  type: "radio",
-                  name: "tripType",
-                  value: "oneway",
-                  checked: searchType === "oneway",
+          const radioComponents = [
+            {
+              type: "label",
+              components: [
+                {
+                  type: "input",
+                  attributes: {
+                    type: "radio",
+                    name: "tripType",
+                    value: "oneway",
+                    checked: searchType === "oneway",
+                  },
                 },
-              },
-              { type: "textnode", content: t.oneway },
-            ],
-          });
+                { type: "textnode", content: t.oneway },
+              ],
+            },
+          ];
 
           if (searchType === "round") {
             radioComponents.push({
@@ -192,7 +194,6 @@ const searchBarComponent = (editor) => {
                     type: "radio",
                     name: "tripType",
                     value: "round",
-                    checked: false,
                   },
                 },
                 { type: "textnode", content: t.round },
@@ -239,10 +240,7 @@ const searchBarComponent = (editor) => {
           }
         );
 
-        if (
-          (theme === "theme1" && searchType === "round") ||
-          (theme === "theme2" && searchType === "round")
-        ) {
+        if (searchType === "round") {
           comps.push({
             type: "input",
             attributes: {
@@ -256,6 +254,11 @@ const searchBarComponent = (editor) => {
 
         if (showTraveler) {
           if (travelerType === "dropdown") {
+            const placeholderText =
+              travelerDropdownType === "traveler-details"
+                ? t.travelerDetails
+                : t.travelers;
+
             comps.push({
               type: "select",
               attributes: {
@@ -271,7 +274,7 @@ const searchBarComponent = (editor) => {
                     selected: true,
                     hidden: true,
                   },
-                  content: t.travelers,
+                  content: placeholderText,
                 },
               ],
             });

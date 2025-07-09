@@ -15,8 +15,6 @@ const SearchBar = ({
   const [locations, setLocations] = useState([]);
   const showReturn = theme === "theme1" && returnField === "with-return";
 
-  console.log('components', components)
-
   const { handleSubmit, control, register } = useForm();
 
   useEffect(() => {
@@ -41,185 +39,171 @@ const SearchBar = ({
   };
 
   return (
-      <form
-        id={id}
-        onSubmit={handleSubmit(onSubmit)}
-        style={{ ...appliedStyle, marginTop: "1rem", marginBottom: "1rem" }}
-        className={classes?.join(" ")}
-        lang={language}
-        dir={direction}
-      >
-        {components.map((field, idx) => {
-          // Trip type radios (theme2)
-          if (
-            field.tag === "div" &&
-            field.classes?.includes("trip-radio-wrapper") &&
-            field.components?.length
-          ) {
-            return (
-              <div
-                key={idx}
-                className="trip-radio-wrapper"
-                style={{ ...field.style, ...field.appliedStyle }}
-              >
-                {field.components.map((labelComp, i) => {
-                  const input = labelComp.components.find(
-                    (c) => c.type === "input"
-                  );
-                  const text = labelComp.components.find(
-                    (c) => c.type === "textnode"
-                  );
+    <form
+      id={id}
+      onSubmit={handleSubmit(onSubmit)}
+      style={{ ...appliedStyle, marginTop: "1rem", marginBottom: "1rem" }}
+      className={classes?.join(" ")}
+      lang={language}
+      dir={direction}
+    >
+      {components.map((field, idx) => {
+        // Skip Return Date if not needed
+        if (field.placeholder === "Return Date" && !showReturn) return null;
 
-                  return (
-                    <label
-                      key={i}
-                      style={{
-                        display: "flex",
-                        gap: "6px",
-                        alignItems: "center",
-                      }}
-                    >
-                      <input
-                        type={input?.attributes?.type || "radio"}
-                        name={input?.attributes?.name || "tripType"}
-                        value={input?.attributes?.value || ""}
-                        defaultChecked={!!input?.attributes?.checked}
-                        {...register(input?.attributes?.name || "tripType")}
-                      />
-                      {text?.content}
-                    </label>
-                  );
-                })}
-              </div>
-            );
-          }
+        const name =
+          field.placeholder?.toLowerCase().replace(/ /g, "_") || `field_${idx}`;
 
-          // Skip Return Date if not needed
-          if (field.placeholder === "Return Date" && !showReturn) return null;
+        // Native select for Origin/Destination
+        const isSelectDropdown =
+          field.tag === "input" &&
+          (field.placeholder === "Origin" ||
+            field.placeholder === "Destination");
 
-          // Render select dropdown
-          if (field.type === "select") {
-            return (
-              <Controller
-                key={idx}
-                name="traveler" // Change this if you want dynamic field names
-                control={control}
-                defaultValue=""
-                render={({ field: { onChange, value, ref, ...rest } }) => (
-                  <select
-                    {...rest}
-                    ref={ref}
-                    onChange={onChange}
-                    value={value}
-                    className={field.classes?.join(" ")}
-                    style={{
-                      backgroundColor: "white",
-                      minWidth: 150,
-                      padding: "8px",
-                      borderRadius: "6px",
-                      ...field.style,
-                      ...field.appliedStyle,
-                    }}
-                  >
-                    <option value="" disabled>
-                      {field.components?.[0]?.content || "Select..."}
+        if (isSelectDropdown) {
+          return (
+            <Controller
+              key={idx}
+              name={field.placeholder.toLowerCase()}
+              control={control}
+              defaultValue=""
+              render={({ field: { onChange, value, ref, ...rest } }) => (
+                <select
+                  {...rest}
+                  ref={ref}
+                  onChange={onChange}
+                  value={value}
+                  className={field.classes?.join(" ")}
+                  style={{
+                    backgroundColor: "white",
+                    border: "1px solid gray",
+                    minWidth: 150,
+                    padding: "8px",
+                    borderRadius: "6px",
+                    ...field.style,
+                    ...field.appliedStyle,
+                  }}
+                >
+                  <option value="" disabled>
+                    {field.placeholder}
+                  </option>
+                  {locations.map((loc, i) => (
+                    <option key={i} value={loc.value}>
+                      {loc.label}
                     </option>
-                    {field.components
-                      ?.filter((c) => c.type === "option")
-                      .map((option, i) => (
-                        <option
-                          key={i}
-                          value={option.attributes?.value || option.content}
-                        >
-                          {option.content}
-                        </option>
-                      ))}
-                  </select>
-                )}
-              />
-            );
-          }
+                  ))}
+                </select>
+              )}
+            />
+          );
+        }
 
-          // Date Pickers
-          if (
-            field.tag === "input" &&
-            (field.placeholder === "Departure Date" ||
-              field.placeholder === "Return Date")
-          ) {
-            const name = field.placeholder.toLowerCase().replace(" ", "_");
-            return (
-              <Controller
-                key={idx}
-                name={name}
-                control={control}
-                defaultValue={null}
-                render={({ field: { onChange, value, ref, ...rest } }) => (
-                  <DatePicker
-                    {...rest}
-                    onChange={onChange}
-                    value={value || null}
-                    placeholder={field.placeholder}
-                    style={{
-                      backgroundColor: "white",
-                      minWidth: 150,
-                      padding: "8px",
-                      borderRadius: "6px",
-                      ...field.style,
-                      ...field.appliedStyle,
-                    }}
-                    className={field.classes?.join(" ")}
-                    ref={ref}
-                  />
-                )}
-              />
-            );
-          }
+        // DatePicker
+        if (
+          field.tag === "input" &&
+          (field.placeholder === "Departure Date" ||
+            field.placeholder === "Return Date")
+        ) {
+          return (
+            <Controller
+              key={idx}
+              name={name}
+              control={control}
+              defaultValue={null}
+              render={({ field: { onChange, value, ref, ...rest } }) => (
+                <DatePicker
+                  {...rest}
+                  onChange={onChange}
+                  value={value || null}
+                  placeholder={field.placeholder}
+                  style={{
+                    backgroundColor: "white",
+                    border: "1px solid gray",
+                    minWidth: 150,
+                    padding: "8px",
+                    borderRadius: "6px",
+                    ...field.style,
+                    ...field.appliedStyle,
+                  }}
+                  className={field.classes?.join(" ")}
+                  ref={ref}
+                />
+              )}
+            />
+          );
+        }
 
-          // Regular input (including traveler input as number)
-          if (field.tag === "input") {
-            const name = field.placeholder.toLowerCase().replace(" ", "_");
-            return (
-              <input
-                key={idx}
-                type={field.attributes?.type || "text"}
-                placeholder={field.placeholder}
-                className={`${
-                  field.classes?.join(" ") || ""
-                } border border-gray-300 px-2 py-1 rounded`}
-                style={{
-                  backgroundColor: "white",
-                  ...field.style,
-                  ...field.appliedStyle,
-                }}
-                {...register(name)}
-              />
-            );
-          }
+        // Traveler dropdowns coming as <select> — override as <input>
+        if (field.tag === "select") {
+          const placeholder =
+            field.components?.[0]?.content === "Travelers"
+              ? "Travelers"
+              : field.components?.[0]?.content === "Traveler Count with Details"
+              ? "Traveler Count with Details"
+              : "Traveler";
 
-          // Submit button
-          if (field.tag === "button") {
-            return (
-              <button
-                key={idx}
-                type="submit"
-                className={`${
-                  field.classes?.join(" ") || ""
-                } px-4 py-1 rounded border border-gray-400`}
-                style={{
-                  backgroundColor: "white",
-                  cursor: "pointer",
-                  ...field.style,
-                  ...field.appliedStyle,
-                }}
-              >
-                {field.content || "Search"}
-              </button>
-            );
-          }
+          return (
+            <input
+              key={idx}
+              type="text"
+              placeholder={placeholder}
+              className={`${
+                field.classes?.join(" ") || ""
+              } border border-gray-600 px-2 py-2 rounded focus:outline-none`}
+              style={{
+                backgroundColor: "white",
+                ...field.style,
+                ...field.appliedStyle,
+              }}
+              {...register("traveler")}
+            />
+          );
+        }
 
-          return null;
-        })}
-      </form>
+        // Generic text input fallback
+        if (field.tag === "input") {
+          return (
+            <input
+              key={idx}
+              type={field.type || "text"}
+              placeholder={field.placeholder}
+              className={`${
+                field.classes?.join(" ") || ""
+              } border border-gray-600 px-2 py-2 rounded focus:outline-none`}
+              style={{
+                backgroundColor: "white",
+                ...field.style,
+                ...field.appliedStyle,
+              }}
+              {...register(name)}
+            />
+          );
+        }
+
+        // Submit button
+        if (field.tag === "button") {
+          return (
+            <button
+              key={idx}
+              type="submit"
+              className={`${
+                field.classes?.join(" ") || ""
+              } px-4 py-2 rounded border border-gray-600`}
+              style={{
+                backgroundColor: "white",
+                cursor: "pointer",
+                ...field.style,
+                ...field.appliedStyle,
+              }}
+            >
+              {field.content || "Search"}
+            </button>
+          );
+        }
+
+        return null;
+      })}
+    </form>
   );
 };
 
