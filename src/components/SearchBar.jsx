@@ -13,9 +13,30 @@ const SearchBar = ({
   returnField,
 }) => {
   const [locations, setLocations] = useState([]);
-  const showReturn = theme === "theme1" && returnField === "with-return";
+  const {
+    handleSubmit,
+    control,
+    register,
+    watch,
+  } = useForm({
+    defaultValues: {
+      tripType: "round",
+    },
+  });
 
-  const { handleSubmit, control, register } = useForm();
+  const tripType = watch("tripType");
+  const [tripTypeTouched, setTripTypeTouched] = useState(false);
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === "tripType") {
+        setTripTypeTouched(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  const showReturnDate = tripType === "round" || !tripTypeTouched;
 
   useEffect(() => {
     const loadLocations = async () => {
@@ -33,7 +54,7 @@ const SearchBar = ({
   const onSubmit = (data) => {
     if (data.departure_date)
       data.departure_date = data.departure_date.format("YYYY-MM-DD");
-    if (data.return_date)
+    if (data.return_date && tripType === "round")
       data.return_date = data.return_date.format("YYYY-MM-DD");
     console.log("Form Data:", data);
   };
@@ -42,19 +63,41 @@ const SearchBar = ({
     <form
       id={id}
       onSubmit={handleSubmit(onSubmit)}
-      style={{ ...appliedStyle, marginTop: "1rem", marginBottom: "1rem" }}
+      style={{ ...appliedStyle, marginBlock: "2rem", }}
       className={classes?.join(" ")}
       lang={language}
       dir={direction}
     >
       {components.map((field, idx) => {
-        // Skip Return Date if not needed
-        if (field.placeholder === "Return Date" && !showReturn) return null;
+        if (field.placeholder === "Return Date" && !showReturnDate) return null;
+
+        if (field.classes?.includes("trip-radio-wrapper") && field.components) {
+          return (
+            <div key={idx} className={`flex gap-4 ${field.classes?.join(" ")}`}>
+              {field.components.map((radioOption, radioIdx) => (
+                <label
+                  key={radioIdx}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    {...register("tripType")}
+                    value={radioOption.components[0].attributes.value}
+                    defaultChecked={radioOption.components[0].attributes.checked}
+                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-gray-700">
+                    {radioOption.components[1].content}
+                  </span>
+                </label>
+              ))}
+            </div>
+          );
+        }
 
         const name =
           field.placeholder?.toLowerCase().replace(/ /g, "_") || `field_${idx}`;
 
-        // Native select for Origin/Destination
         const isSelectDropdown =
           field.tag === "input" &&
           (field.placeholder === "Origin" ||
@@ -98,7 +141,6 @@ const SearchBar = ({
           );
         }
 
-        // DatePicker
         if (
           field.tag === "input" &&
           (field.placeholder === "Departure Date" ||
@@ -133,34 +175,52 @@ const SearchBar = ({
           );
         }
 
-        // Traveler dropdowns coming as <select> — override as <input>
         if (field.tag === "select") {
-          const placeholder =
-            field.components?.[0]?.content === "Travelers"
-              ? "Travelers"
-              : field.components?.[0]?.content === "Traveler Count with Details"
+          const travelerType =
+            field.components?.[0]?.content === "Traveler Count with Details"
               ? "Traveler Count with Details"
               : "Traveler";
 
+          const options =
+            travelerType === "Traveler Count with Details"
+              ? [
+                  { label: "Adult", value: "adult" },
+                  { label: "Child", value: "child" },
+                  { label: "Senior", value: "senior" },
+                ]
+              : [{ label: "Traveler", value: "traveler" }];
+
           return (
-            <input
+            <Controller
               key={idx}
-              type="text"
-              placeholder={placeholder}
-              className={`${
-                field.classes?.join(" ") || ""
-              } border border-gray-600 px-2 py-2 rounded focus:outline-none`}
-              style={{
-                backgroundColor: "white",
-                ...field.style,
-                ...field.appliedStyle,
-              }}
-              {...register("traveler")}
+              name="traveler"
+              control={control}
+              defaultValue={travelerType}
+              render={({ field: { onChange, value } }) => (
+                <select
+                  onChange={onChange}
+                  value={value}
+                  className={`${
+                    field.classes?.join(" ") || ""
+                  } border border-gray-600 px-2 py-2 rounded focus:outline-none`}
+                  style={{
+                    minWidth: 150,
+                    backgroundColor: "white",
+                    ...field.style,
+                    ...field.appliedStyle,
+                  }}
+                >
+                  {options.map(({ label, value }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              )}
             />
           );
         }
 
-        // Generic text input fallback
         if (field.tag === "input") {
           return (
             <input
@@ -180,7 +240,6 @@ const SearchBar = ({
           );
         }
 
-        // Submit button
         if (field.tag === "button") {
           return (
             <button

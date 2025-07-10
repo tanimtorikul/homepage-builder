@@ -71,6 +71,14 @@ const extractComponentsFromJson = async (parsedJson) => {
           attributes: comp.attributes || {},
         });
       }
+      if (comp.type === "latest-news") {
+        found.push({
+          type: "latest-news",
+          mode: comp.attributes?.mode || "static",
+          text: "", 
+          ...common,
+        });
+      }
 
       // Recurse into nested children
       if (comp.components) extract(comp.components);
@@ -81,6 +89,26 @@ const extractComponentsFromJson = async (parsedJson) => {
   parsedJson.pages?.forEach((p) =>
     p.frames?.forEach((f) => extract(f.component?.components || []))
   );
+
+  for (const comp of found) {
+    if (comp.type === "latest-news") {
+      if (comp.mode === "static") {
+        const original = parsedJson.pages
+          .flatMap((p) => p.frames || [])
+          .flatMap((f) => f.component?.components || [])
+          .find((c) => c.attributes?.id === comp.id);
+        comp.text = original?.text || original?.attributes?.text || "";
+      } else {
+        try {
+          const res = await fetch("/data.json");
+          const data = await res.json();
+          comp.text = data?.latestNews || "No dynamic news found.";
+        } catch {
+          comp.text = "Failed to load dynamic news.";
+        }
+      }
+    }
+  }
 
   return found;
 };

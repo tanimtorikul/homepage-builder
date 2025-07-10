@@ -16,6 +16,7 @@ import searchHeadingText from "../blocks/searchHeadingText";
 
 const PageBuilder = () => {
   const [editor, setEditor] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
 
   const handleSave = async () => {
@@ -28,17 +29,27 @@ const PageBuilder = () => {
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Header */}
       <header className="p-2 bg-gray-100 border-b flex justify-between items-center">
         <h1 className="text-xl font-bold">Builder</h1>
-        <button
-          onClick={handleSave}
-          className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded"
-        >
-          Save Template
-        </button>
+        <div className="space-x-2">
+          <button
+            onClick={handleSave}
+            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded"
+          >
+            Save Template
+          </button>
+          <button
+            onClick={() => setIsEditMode(!isEditMode)}
+            className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-1 rounded"
+          >
+            {isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
+          </button>
+        </div>
       </header>
 
-      <div className="flex-1 flex">
+      {/* Editor */}
+      <div className={`flex-1 flex ${isEditMode ? "edit-mode" : ""}`}>
         <StudioEditor
           onEditor={(editorInstance) => {
             setEditor(editorInstance);
