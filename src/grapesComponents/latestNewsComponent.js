@@ -34,6 +34,13 @@ const latestNewsComponent = (editor) => {
           overflow: "hidden",
           padding: "10px",
           boxSizing: "border-box",
+          backgroundColor: "#069494 ",
+          border: "1px solid #ccc",
+          borderRadius: "6px",
+          color: "#333",
+          fontSize: "16px",
+          fontWeight: "700",
+          fontFamily: "'Segoe UI', sans-serif",
         },
       },
 
@@ -71,7 +78,7 @@ const latestNewsComponent = (editor) => {
               { value: "static", name: "Static" },
               { value: "dynamic", name: "Dynamic" },
             ],
-              value: "static", 
+            value: "static",
           },
           {
             type: "select",
@@ -81,7 +88,7 @@ const latestNewsComponent = (editor) => {
               { value: "ltr", name: "Left to Right" },
               { value: "rtl", name: "Right to Left" },
             ],
-              value: "ltr", 
+            value: "ltr",
             changeProp: 1,
           },
         ];
@@ -103,7 +110,7 @@ const latestNewsComponent = (editor) => {
                 { value: "en", name: "English" },
                 { value: "ar", name: "Arabic" },
               ],
-                value: "en", 
+              value: "en",
               changeProp: 1,
             }
           );
@@ -113,21 +120,37 @@ const latestNewsComponent = (editor) => {
       },
     },
 
-   view: {
+    view: {
   onRender() {
     const attrs = this.model.getAttributes();
     const { text, mode, direction, language } = attrs;
 
-    // Clear previous content
-    this.el.innerHTML = "";
+    // Apply default styles to outer element
+    Object.assign(this.el.style, {
+    display: "block",
+          width: "100%",
+          overflow: "hidden",
+          padding: "10px",
+          boxSizing: "border-box",
+          backgroundColor: "#069494 ",
+          border: "1px solid #ccc",
+          borderRadius: "6px",
+          color: "#333",
+          fontSize: "16px",
+          fontWeight: "700",
+          fontFamily: "'Segoe UI', sans-serif",
+    });
 
-    // Set direction on the wrapper element
+    // Set direction
     this.el.setAttribute("dir", direction);
     this.el.style.direction = direction;
 
+    // Clear old content
+    this.el.innerHTML = "";
+
+    // Create wrapper and set content
     const wrapper = document.createElement("div");
 
-    // Static or dynamic text
     let finalText = "";
     if (mode === "static") {
       finalText = text || (language === "ar" ? "نص الأخبار الثابتة" : "This is a static latest news scrolling text...");
@@ -138,11 +161,11 @@ const latestNewsComponent = (editor) => {
     }
 
     wrapper.textContent = finalText;
+
+    // Optional: Add some style to the inner wrapper if needed
     wrapper.style.whiteSpace = "nowrap";
     wrapper.style.display = "inline-block";
     wrapper.style.width = "100%";
-
-    // 🔥 This is the key for Studio SDK
     wrapper.style.textAlign = direction === "rtl" ? "right" : "left";
     wrapper.style.paddingLeft = direction === "rtl" ? "0" : "20px";
     wrapper.style.paddingRight = direction === "rtl" ? "20px" : "0";

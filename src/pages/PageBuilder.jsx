@@ -9,14 +9,16 @@ import { googleFontsAssetProvider } from "@grapesjs/studio-sdk-plugins";
 import heroImageComponent from "../grapesComponents/heroImageComponent";
 import searchBarComponent from "../grapesComponents/searchBarComponent";
 import latestNewsComponent from "../grapesComponents/latestNewsComponent";
+import whyChooseUsComponent from "../grapesComponents/whyChooseUsComponent";
+
 import heroImageBlock from "../blocks/heroImageBlock";
 import searchBarBlock from "../blocks/searchBarBlock";
 import latestNewsBlock from "../blocks/latestNewsBlock";
 import searchHeadingText from "../blocks/searchHeadingText";
+import whyChooseUsBlock from "../blocks/whyChooseUsBlock";
 
 const PageBuilder = () => {
   const [editor, setEditor] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
 
   const handleSave = async () => {
@@ -32,24 +34,16 @@ const PageBuilder = () => {
       {/* Header */}
       <header className="p-2 bg-gray-100 border-b flex justify-between items-center">
         <h1 className="text-xl font-bold">Builder</h1>
-        <div className="space-x-2">
-          <button
-            onClick={handleSave}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded"
-          >
-            Save Template
-          </button>
-          <button
-            onClick={() => setIsEditMode(!isEditMode)}
-            className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-1 rounded"
-          >
-            {isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
-          </button>
-        </div>
+        <button
+          onClick={handleSave}
+          className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1 rounded"
+        >
+          Save Template
+        </button>
       </header>
 
       {/* Editor */}
-      <div className={`flex-1 flex ${isEditMode ? "edit-mode" : ""}`}>
+      <div className="flex-1 flex">
         <StudioEditor
           onEditor={(editorInstance) => {
             setEditor(editorInstance);
@@ -59,6 +53,7 @@ const PageBuilder = () => {
             heroImageComponent(editorInstance);
             searchBarComponent(editorInstance);
             latestNewsComponent(editorInstance);
+            whyChooseUsComponent(editorInstance);
           }}
           options={{
             theme: "dark",
@@ -83,6 +78,7 @@ const PageBuilder = () => {
                 searchBarBlock,
                 latestNewsBlock,
                 searchHeadingText,
+                whyChooseUsBlock,
               ],
             },
             project: {

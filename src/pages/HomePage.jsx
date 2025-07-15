@@ -6,10 +6,13 @@ import Topbar from "../components/Topbar";
 import Navbar from "../components/Navbar";
 import SearchText from "../components/SearchText";
 import LatestNews from "../components/LatestNews";
+import WhyChooseUs from "../components/WhyChooseUs";
 
 const HomePage = () => {
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  console.log('components', components)
 
   useEffect(() => {
     const loadComponents = async () => {
@@ -24,6 +27,7 @@ const HomePage = () => {
       const extracted = await extractComponentsFromJson(parsed);
 
       setComponents(extracted);
+      console.log(components)
       setLoading(false);
     };
 
@@ -43,6 +47,7 @@ const HomePage = () => {
           if (comp.type === "search-bar") return <SearchBar key={i} {...comp} />;
             if (comp.type === "text") return <SearchText key={i} {...comp} />;
             if (comp.type === "latest-news") return <LatestNews key={i} {...comp} />;
+            if (comp.type === "why-choose-us") return <WhyChooseUs key={i} {...comp} />;
           return null;
         })}
       </main>

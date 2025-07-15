@@ -8,7 +8,7 @@ const searchBarBlock = {
       theme: "theme1",
       returnOption: "with",
       language: "en", 
-    },
+    }
   },
 };
 
